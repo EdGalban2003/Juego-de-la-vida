@@ -27,6 +27,9 @@ last_advance_time = pygame.time.get_ticks()
 # Variables para el contador de generación
 generation = 0
 
+# Variable para controlar el avance generación por generación
+step_by_step = False
+
 # Colores
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -37,16 +40,16 @@ font = pygame.font.Font(None, 36)
 
 # Define varios patrones predefinidos como listas de coordenadas (row, col)
 patterns = [
-    [(0, 1), (1, 2), (2, 0), (2, 1), (2, 2)],  # Glider
-    [(0, 0), (0, 1), (0, 2)],  # Blinker
-    [(0, 0), (1, 1), (2, 2), (3, 3)],  # Diagonal
-    [(0, 1), (1, 0), (1, 1), (1, 2), (2, 0)],  # Block
-    [(0, 1), (1, 0), (1, 2), (2, 0), (2, 2)],  # Boat
-    [(0, 0), (0, 1), (1, 0), (2, 2), (3, 2)],  # Beacon
-    [(0, 0), (0, 1), (1, 0), (1, 1), (2, 2)],  # Toad
-    [(0, 1), (1, 1), (1, 0)],  # Glider 2
-    [(0, 0), (1, 0), (1, 1), (2, 0), (3, 0)],  # Spaceship
+    [(0, 1), (1, 2), (2, 0), (2, 1), (2, 2)],  # Nave espacial
+    [(0, 0), (0, 1), (0, 2)],  # Línea
     [(0, 1), (0, 3), (1, 0), (1, 4), (2, 1), (2, 2), (2, 3), (2, 4), (3, 1), (4, 2)]  # Pulsar
+]
+
+# Nombres de los patrones
+pattern_names = [
+    "Nave espacial",
+    "Línea",
+    "Pulsar"
 ]
 
 # Índice del patrón seleccionado actualmente
@@ -71,7 +74,7 @@ def draw_menu():
     
     for i, pattern in enumerate(patterns):
         pygame.draw.rect(screen, WHITE, (x, y, button_width, button_height))
-        text = font.render("Patrón " + str(i + 1), True, BLACK)
+        text = font.render(pattern_names[i], True, BLACK)  # Mostrar el nombre del patrón
         screen.blit(text, (x + 10, y + 10))
         y += button_height + button_spacing
         
@@ -137,8 +140,10 @@ while running:
                 grid = next_generation()  # Avanzar 1 generación con la barra espaciadora
                 generation += 1  # Incrementar el contador de generación
             elif event.key == pygame.K_c:
-                grid = np.zeros((grid_rows, grid_cols), dtype=int)  # Limpiar la cuadrícula con la tecla 'C'
-                generation = 0  # Reiniciar el contador de generación
+                if not step_by_step:
+                    grid = np.zeros((grid_rows, grid_cols), dtype=int)  # Limpiar la cuadrícula con la tecla 'C'
+                    generation = 0  # Reiniciar el contador de generación
+                step_by_step = not step_by_step  # Alternar el modo de avance generación por generación
             elif event.key == pygame.K_v:
                 auto_advance = not auto_advance  # Alternar avance automático con la tecla 'V'
 
@@ -146,6 +151,8 @@ while running:
         grid = next_generation()
         last_advance_time = current_time
         generation += 1  # Incrementar el contador de generación
+    elif step_by_step:  # Avance generación por generación
+        step_by_step = False  # Detener el avance después de una generación
 
     screen.fill(BLACK)
     draw_grid()
